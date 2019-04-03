@@ -1,0 +1,25 @@
+{
+  "name": "nsi-csv-validator",
+  "version": "1.0.0",
+  "engines": {
+    "node": ">=10.15.3"
+  },
+  "description": "modulo per validare file csv a partire da un file di regole formato json",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ventu88/nsi-csv-validator.git"
+  },
+  "author": "m.venturi",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Ventu88/nsi-csv-validator/issues"
+  },
+  "homepage": "https://github.com/Ventu88/nsi-csv-validator#readme",
+  "dependencies": {
+    "csv": "^5.1.1"
+  }
+}
