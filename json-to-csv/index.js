@@ -14,7 +14,7 @@ function jsonToCsv(json, csvFilePath) {
                     if (i < json.length - 1) fs.appendFileSync(csvFilePath, "\n");
                 }
 
-                resolve()
+                resolve(csvFilePath)
             });
         }
         catch(err) {
