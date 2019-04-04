@@ -4,7 +4,12 @@ const validator = require("./validator");
 
 const validateCsv = async function (csvFilePath, ruleFilePath) {
     try {
-        const jsonToValidate = await crvReader.csvToJson(csvFilePath);
+        const jsonCsv = await crvReader.csvToJson(csvFilePath);
+        const jsonToValidate = {
+            name: csvFilePath,
+            content: jsonCsv
+        };
+
         const result = await validator.validate(jsonToValidate, ruleFilePath);
 
         const csvFilePath_ok =

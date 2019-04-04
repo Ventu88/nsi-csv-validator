@@ -3,10 +3,10 @@ const fs = require("fs");
 async function validate(jsonToValidate, ruleFilePath) {
     try {
         const rules = await getRules(ruleFilePath);
-        return await checkJsonAgainstRules(jsonToValidate, rules);
+        return await checkJsonAgainstRules(jsonToValidate.content, rules);
     }
     catch (err) {
-        throw err;
+        throw new Error(`${jsonToValidate.name} - ${err.message}`);
     }
 }
 
