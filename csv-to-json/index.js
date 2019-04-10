@@ -3,7 +3,7 @@ const fs = require("fs");
 
 function csvToJson(csvFile) {
     return new Promise((resolve, reject) => {
-        const input = fs.readFileSync(csvFile, "UTF-8");
+        const input = fs.readFileSync(csvFile, "utf8");
 
         csv.parse(
             input,

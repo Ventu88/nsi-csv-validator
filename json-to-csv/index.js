@@ -8,10 +8,10 @@ function jsonToCsv(json, csvFilePath) {
 
                 for(let i = 0; i < json.length; i++) {
                     for(let j = 0; j < json[i].length; j++) {
-                        fs.appendFileSync(csvFilePath, json[i][j]);
-                        if (j < json[i].length - 1) fs.appendFileSync(csvFilePath, ";");
+                        fs.appendFileSync(csvFilePath, json[i][j], "utf8");
+                        if (j < json[i].length - 1) fs.appendFileSync(csvFilePath, ";", "utf8");
                     }
-                    if (i < json.length - 1) fs.appendFileSync(csvFilePath, "\n");
+                    if (i < json.length - 1) fs.appendFileSync(csvFilePath, "\n", "utf8");
                 }
 
                 resolve(csvFilePath)

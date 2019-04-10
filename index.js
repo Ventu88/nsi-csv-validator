@@ -1,10 +1,10 @@
-const crvReader = require("./csv-to-json");
+const csvReader = require("./csv-to-json");
 const csvWriter = require("./json-to-csv");
 const validator = require("./validator");
 
 const validateCsv = async function (csvFilePath, ruleFilePath) {
     try {
-        const jsonCsv = await crvReader.csvToJson(csvFilePath);
+        const jsonCsv = await csvReader.csvToJson(csvFilePath);
         const jsonToValidate = {
             name: csvFilePath,
             content: jsonCsv

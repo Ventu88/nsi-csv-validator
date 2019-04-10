@@ -80,7 +80,7 @@ function checkRecord(record, rules) {
         let fieldIndex = rules[i].index;
         if (!RegExp(rules[i]["regola"]).test(record[fieldIndex])) {
             // aggiungo un campo per l'errore
-            record.push(`Il campo ${rules[i]["nome"]} non ha passato la validazione.`);
+            record.push(`Campo ${rules[i]["nome"]} non valido! ${rules[i]["descrizione_regola"]}`);
             valid = false;
             return false;
         }
