@@ -1,91 +1,68 @@
 const fs = require("fs");
 
+const promisify = require("util").promisify;
+const readFile = promisify(fs.readFile);
+
 async function validate(jsonToValidate, ruleFilePath) {
+    let rules;
     try {
-        const rules = await getRules(ruleFilePath);
-        return await checkJsonAgainstRules(jsonToValidate.content, rules);
-    }
-    catch (err) {
-        throw new Error(`${jsonToValidate.name} - ${err.message}`);
+        rules = await getRules(ruleFilePath);
+        return checkJsonAgainstRules(jsonToValidate.content, rules);
+    } catch (err) {
+        let fileIndication = "";
+        if (rules) fileIndication = `${jsonToValidate.name} - `;
+        throw new Error(`${fileIndication}${err.message}`);
     }
 }
 
 async function getRules(ruleFilePath) {
     try {
-        return JSON.parse(fs.readFileSync(ruleFilePath, "UTF-8"));
-    }
-    catch {
+        return JSON.parse(await readFile(ruleFilePath, "UTF-8"));
+    } catch {
         throw new Error("Impossibile trovare il file delle regole per la validazione del csv");
     }
 }
 
-async function checkJsonAgainstRules(jsonToCheck, jsonRules) {
-    try {
-        const header = jsonToCheck[0];
-        await checkHeader(header, jsonRules);
-        const checked = await checkBody(jsonToCheck.slice(1), jsonRules);
-        return {ok: [header].concat(checked.ok), nok:  [header].concat(checked.nok)};
-    }
-    catch (err) {
-        throw err;
-    }
+function checkJsonAgainstRules(jsonToCheck, jsonRules) {
+    const header = jsonToCheck[0];
+    checkHeader(header, jsonRules);
+    const checkedBody = checkBody(jsonToCheck.slice(1), jsonRules);
+    return {ok: [header].concat(checkedBody.ok), nok: [header].concat(checkedBody.nok)};
 }
 
 function checkHeader(headers, rules) {
-    return new Promise((resolve, reject) => {
-        // controllo la linghezza
-        if (headers.length !== rules.length) return reject(new Error(`Attesi ${rules.length} headers, trovati ${headers.length}`));
-        //controllo il valore dei campi
-        for(let i = 0; i < headers.length; i++) {
-            // cerco l'indice della regola con lo stesso nome
-            let ruleIndex = rules.findIndex(x => x["nome"].toUpperCase() === headers[i].toUpperCase());
-            // se lo trovo, aggiungo l'indeice' al file di regole per controllare meglio i contenuti
-            if (ruleIndex < 0) return reject(new Error(`Header ${headers[i]} non trovato`));
-            rules[ruleIndex]["index"] = i;
-        }
-        // cerco regole senza indice
-        const badRuleIndex = rules.findIndex(x => x["index"] === undefined);
-        if (badRuleIndex > 0) return reject(new Error(`Header ${rules[badRuleIndex]["nome"]} non trovato`));
+    if (headers.length !== rules.length)
+        throw new Error(`Attesi ${rules.length} headers, trovati ${headers.length}`);
 
-        // se arrivo qua ho un json di regole ben formato per il check dei campi
-        resolve();
-    });
+    for (let i = 0; i < rules.length; i++) {
+        let csvFieldIndex = headers.findIndex(header => header.toUpperCase() === rules[i]["nome"].toUpperCase());
+        if (csvFieldIndex < 0) throw new Error(`Header ${rules[i]["nome"]} non trovato`);
+        rules[i]["csvIndex"] = csvFieldIndex;
+    }
 }
 
-async function checkBody(body, rules) {
-    try {
-        let result = {ok: [], nok: []};
-        await body.forEach((record) => {
-            let ok = checkRecord(record, rules);
-            ok ? result.ok.push(record) : result.nok.push(record);
-        });
-        return result;
-    }
-    catch (err) {
-        throw err;
-    }
+function checkBody(body, rules) {
+    let result = {ok: [], nok: []};
+    body.forEach((record) => {
+        let validRecord = checkRecord(record, rules);
+        validRecord ? result.ok.push(record) : result.nok.push(record);
+    });
+    return result;
 }
 
 function checkRecord(record, rules) {
-    let valid = true;
-    for (let i = 0; i< rules.length; i++) {
-        // controllo la lunghezza
+    for (let i = 0; i < rules.length; i++) {
         if (record.length !== rules.length) {
-            // aggiungo un campo per l'errore
             record.push(`Attesi ${rules.length} campi, trovati ${record.length}`);
-            valid = false;
-            break;
+            return false;
         }
-        // controllo la regola del campo
-        let fieldIndex = rules[i].index;
+        let fieldIndex = rules[i]["csvIndex"];
         if (!RegExp(rules[i]["regola"]).test(record[fieldIndex])) {
-            // aggiungo un campo per l'errore
             record.push(`Campo ${rules[i]["nome"]} non valido! ${rules[i]["descrizione_regola"]}`);
-            valid = false;
             return false;
         }
     }
-    return valid;
+    return true;
 }
 
 module.exports.validate = validate;

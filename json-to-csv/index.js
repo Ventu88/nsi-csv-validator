@@ -6,6 +6,8 @@ function jsonToCsv(json, csvFilePath) {
             fs.exists(csvFilePath, function(exists) {
                 if(exists) fs.unlinkSync(csvFilePath);
 
+                fs.appendFileSync(csvFilePath, "\uFEFF", "utf8");
+
                 for(let i = 0; i < json.length; i++) {
                     for(let j = 0; j < json[i].length; j++) {
                         fs.appendFileSync(csvFilePath, json[i][j], "utf8");

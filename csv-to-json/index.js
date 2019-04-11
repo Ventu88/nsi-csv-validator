@@ -1,23 +1,24 @@
 const csv = require("csv");
 const fs = require("fs");
+const stripBom = require('strip-bom');
 
-function csvToJson(csvFile) {
-    return new Promise((resolve, reject) => {
-        const input = fs.readFileSync(csvFile, "utf8");
+const promisify = require("util").promisify;
+const readFile = promisify(fs.readFile);
+const csvParse = promisify(csv.parse);
 
-        csv.parse(
-            input,
+async function csvToJson(csvFile) {
+    try {
+        const input = await readFile(csvFile, "utf8");
+        return await csvParse(
+            stripBom(input),
             {
                 delimiter: ";",
                 relax_column_count: true,
                 skip_lines_with_error: false
-            },
-            (err, records) => {
-                if (err) return reject(err);
-                return resolve(records);
             }
         );
-    });
+    }
+    catch(err) {throw new Error(err.message)}
 }
 
 module.exports.csvToJson = csvToJson;
