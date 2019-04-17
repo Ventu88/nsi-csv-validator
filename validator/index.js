@@ -1,4 +1,5 @@
 const fs = require("fs");
+const path = require("path");
 
 const promisify = require("util").promisify;
 const readFile = promisify(fs.readFile);
@@ -10,7 +11,7 @@ async function validate(jsonToValidate, ruleFilePath) {
         return checkJsonAgainstRules(jsonToValidate.content, rules);
     } catch (err) {
         let fileIndication = "";
-        if (rules) fileIndication = `${jsonToValidate.name} - `;
+        if (rules) fileIndication = `${path.basename(jsonToValidate.name)} - `;
         throw new Error(`${fileIndication}${err.message}`);
     }
 }
