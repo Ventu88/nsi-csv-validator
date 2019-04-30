@@ -12,15 +12,21 @@ const validateCsv = async function (csvFilePath, ruleFilePath) {
 
         const result = await validator.validate(jsonToValidate, ruleFilePath);
 
-        const csvFilePath_ok =
-            csvFilePath.substring(0, csvFilePath.lastIndexOf(".")) +
-            "_ok" + csvFilePath.substring(csvFilePath.lastIndexOf("."));
-        const okFile = await csvWriter.jsonToCsv(result.ok, csvFilePath_ok);
+        let okFile = null;
+        if (result.ok.length > 1) {
+            const csvFilePath_ok =
+                csvFilePath.substring(0, csvFilePath.lastIndexOf(".")) +
+                "_ok" + csvFilePath.substring(csvFilePath.lastIndexOf("."));
+            okFile = await csvWriter.jsonToCsv(result.ok, csvFilePath_ok);
+        }
 
-        const csvFilePath_nok =
-            csvFilePath.substring(0, csvFilePath.lastIndexOf(".")) +
-            "_nok" + csvFilePath.substring(csvFilePath.lastIndexOf("."));
-        const nokFile = await csvWriter.jsonToCsv(result.nok, csvFilePath_nok);
+        let nokFile = null;
+        if (result.nok.length > 1) {
+            const csvFilePath_nok =
+                csvFilePath.substring(0, csvFilePath.lastIndexOf(".")) +
+                "_nok" + csvFilePath.substring(csvFilePath.lastIndexOf("."));
+            nokFile = await csvWriter.jsonToCsv(result.nok, csvFilePath_nok);
+        }
 
         return {ok: okFile, nok: nokFile};
     }
